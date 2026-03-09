@@ -1,61 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reloj Digital - iPad Mini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            height: 100vh;
+            background-color: #ffffff;
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            touch-action: manipulation; /* Mejora el toque en iOS antiguo */
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        #clock-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+        }
 
-<title>Reloj</title>
+        #clock {
+            font-size: 60px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.1;
+            letter-spacing: 3px;
+            word-spacing: 6px;
+            white-space: nowrap;
+        }
 
-<style>
-body{
-    background:black;
-    color:white;
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-family:Arial, sans-serif;
-}
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.92);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-top: 1px solid #ccc;
+            backdrop-filter: blur(4px); /* Si el iPad lo soporta, si no se ignora */
+        }
 
-#clock{
-    font-size:80px;
-    font-weight:bold;
-    text-align:center;
-}
-</style>
+        .button {
+            padding: 14px 24px;
+            font-size: 18px;
+            min-width: 70px;
+            border: 2px solid #444;
+            border-radius: 12px;
+            background: #f0f0f0;
+            color: #000;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        }
 
+        .button:active {
+            background: #ddd;
+        }
+
+        /* Modo oscuro */
+        body.dark {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        body.dark .controls {
+            background: rgba(30,30,30,0.92);
+            border-top-color: #444;
+        }
+
+        body.dark .button {
+            background: #222;
+            color: #fff;
+            border-color: #555;
+        }
+
+        body.dark .button:active {
+            background: #333;
+        }
+
+        @media (max-width: 768px) {
+            #clock {
+                font-size: 9vw;  /* Escala relativa al ancho de pantalla */
+                min-font-size: 48px;
+                max-font-size: 90px;
+            }
+            .button {
+                padding: 12px 20px;
+                font-size: 16px;
+                min-width: 60px;
+            }
+        }
+    </style>
 </head>
+<body onload="startClock()">
 
-<body>
+    <div id="clock-container">
+        <div id="clock">12:00:00 AM</div>
+    </div>
 
-<div id="clock"></div>
+    <div class="controls">
+        <button class="button" onclick="toggleTheme()">Tema</button>
+        <button class="button" onclick="changeFont()">Estilo</button>
+        <button class="button" onclick="increaseSize()">+</button>
+        <button class="button" onclick="decreaseSize()">-</button>
+    </div>
 
-<script>
-function updateClock(){
+    <script>
+        let isDark = false;
+        let fontSize = 60;
+        let currentFontIndex = 0;
 
-    let now = new Date();
+        const fontStyles = [
+            '"Courier New", Courier, monospace',     // Digital clásico
+            'Georgia, "Times New Roman", Times, serif', // Reloj pared elegante
+            'Arial, Helvetica, sans-serif',           // Limpio moderno
+            'Impact, Haettenschweiler, "Arial Black", sans-serif', // Muy ancho y grueso
+            '"Helvetica Neue", Helvetica, Arial, sans-serif' // iOS clásico
+        ];
 
-    let h = now.getHours();
-    let m = now.getMinutes();
-    let s = now.getSeconds();
+        function updateClock() {
+            const now = new Date();
+            let h = now.getHours();
+            const m = now.getMinutes().toString().padStart(2, '0');
+            const s = now.getSeconds().toString().padStart(2, '0');
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            
+            h = h % 12;
+            h = h === 0 ? 12 : h;
 
-    let ampm = h >= 12 ? "PM" : "AM";
+            document.getElementById('clock').textContent = 
+                h + ':' + m + ':' + s + ' ' + ampm;
+        }
 
-    h = h % 12;
-    h = h ? h : 12;
+        function startClock() {
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
 
-    m = m < 10 ? "0"+m : m;
-    s = s < 10 ? "0"+s : s;
+        function toggleTheme() {
+            isDark = !isDark;
+            document.body.classList.toggle('dark', isDark);
+        }
 
-    document.getElementById("clock").innerHTML =
-        h + ":" + m + ":" + s + " " + ampm;
-}
+        function increaseSize() {
+            fontSize += 10;
+            if (fontSize > 160) fontSize = 160;
+            document.getElementById('clock').style.fontSize = fontSize + 'px';
+        }
 
-setInterval(updateClock,1000);
-updateClock();
-</script>
+        function decreaseSize() {
+            fontSize -= 10;
+            if (fontSize < 40) fontSize = 40;
+            document.getElementById('clock').style.fontSize = fontSize + 'px';
+        }
+
+        function changeFont() {
+            currentFontIndex = (currentFontIndex + 1) % fontStyles.length;
+            const clock = document.getElementById('clock');
+            clock.style.fontFamily = fontStyles[currentFontIndex];
+            clock.style.fontWeight = '900'; // lo más grueso posible
+            clock.style.letterSpacing = currentFontIndex === 3 ? '4px' : '2px';
+        }
+    </script>
 
 </body>
 </html>
